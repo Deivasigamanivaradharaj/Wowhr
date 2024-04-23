@@ -14,6 +14,7 @@ function LinkedinLogin() {
     const database = getDatabase(app);
     var newuserid = "";
     var olduserid = "";
+    const currDate = new Date();
     const navigate = useNavigate();
     const authContext = useContext(AuthContext);
     const [errors, setErrors] = useState({});
@@ -52,11 +53,20 @@ function LinkedinLogin() {
         if (!authContext.Linkedin.trim()) {
             validationErrors.linkedin = 'LinkedIn URL is required';
         }
+        if (document.getElementById("profession").value=="0") {
+            validationErrors.profession = 'profession is required';
+        }
+        if (!authContext.phone.trim()) {
+            validationErrors.phone = 'Phone is required';
+        }
+        if (document.getElementById("gender").value=="0") {
+            validationErrors.gender = 'Gender is required';
+        }
 
         if (Object.keys(validationErrors).length === 0) {
 
             const apiKeys = [
-                "d76e658a11mshd6c269f5a381918p174e9bjsn0f7de04b570d",
+                "bc7bb835b8msh4998bc7fc7c13afp116fa7jsn54910e3a0fef",
                 "0438240e7dmsha7b0caabc8f44c4p1a203ejsn0979cc90e2e8",
                 "91c6c5d5b0msh6d699df9be69317p1f91eajsn92a6d509a7ed",
                 "d70bfec57fmshe055afb23408e60p17f00ajsn23dd9217c78f",
@@ -86,90 +96,150 @@ function LinkedinLogin() {
 
                 if (!response.ok) {
                     if (response.status === 429 && apiKeyIndex < apiKeys.length - 1) {
-                        console.log("Switching to next API key...");
                         handleSubmit(apiKeyIndex + 1);
                     } else {
                         throw new Error('Failed to fetch profile data');
                     }
                 }
                 else{
-                    console.log(apiKeyIndex);
                     toast.success('Fetching data...');
                 const data = await response.json();
-                const { firstName, lastName, headline, position, profilePicture } = data;
+                const { firstName, lastName, headline, position, profilePicture, educations } = data;
                 const firstTitle = position && position.length > 0 ? position[0].title : '';
+                const fieldofstudy = educations  && educations.length > 0 ? educations[0].degree+" "+educations[0].fieldOfStudy : '';
+                const schoolName = educations  && educations.length > 0 ? educations[0].schoolName : '';
+                const endyear = educations  && educations.length > 0 ? educations[0].end.year : '';
                 const firstTitlecompany = position && position.length > 0 ? position[0].companyName : '';
-                console.log(data)
-                console.log("First Name:", firstName);
-                console.log("Last Name:", lastName);
-                console.log("Headline:", headline);
-                console.log("Designation:", firstTitle);
-                console.log("company:", firstTitlecompany);
-                console.log("Profile Picture URL:", profilePicture);
 
                 authContext.setName(`${firstName} ${lastName}`);
                 authContext.setdesignation(firstTitle);
                 authContext.setcompanyname(firstTitlecompany);
                 authContext.setdp(profilePicture);
+                authContext.setdegree(fieldofstudy);
+                authContext.setyop(endyear);
+                authContext.setcollegename(schoolName);
 
-                get(child(ref(database), `users/`)).then((snapshot) => {
+
+                if(document.getElementById('profession').value=="student"){
+                    get(child(ref(database), `users/students/`)).then((snapshot) => {
+                        if (snapshot.exists()) {
+                            snapshot.forEach((user)=>{
+                                newuserid = user.key;
+                                if(user.val().Email == authContext.email){
+                                  olduserid = user.key;
+                                }
+                            })
+                            if(olduserid!=""){
+                                set(ref(database, 'users/students/' + olduserid), {
+                                    Email: authContext.email,
+                                    Name: `${firstName} ${lastName}`,
+                                    Degree:fieldofstudy,
+                                    Yop:endyear,
+                                    College:schoolName,
+                                    DP: profilePicture,
+                                    Linkedin: authContext.Linkedin,
+                                    Phone: authContext.phone,
+                                    Gender:authContext.gender,
+                                    Date:Date.now()
+                                  });
+                            }
+                            else{
+                                newuserid = Number(newuserid)+1;
+                                set(ref(database, 'users/students/' + newuserid), {
+                                    Email: authContext.email,
+                                    Name: `${firstName} ${lastName}`,
+                                    Degree:fieldofstudy,
+                                    Yop:endyear,
+                                    College:schoolName,
+                                    DP: profilePicture,
+                                    Linkedin: authContext.Linkedin,
+                                    Phone: authContext.phone,
+                                    Gender:authContext.gender,
+                                    Date:Date.now()
+                                  });
+                            }
+                        } else {
+                          set(ref(database, 'users/students/' + "1"), {
+                            Email: authContext.email,
+                                    Name: `${firstName} ${lastName}`,
+                                    Degree:fieldofstudy,
+                                    Yop:endyear,
+                                    College:schoolName,
+                                    DP: profilePicture,
+                                    Linkedin: authContext.Linkedin,
+                                    Phone: authContext.phone,
+                                    Gender:authContext.gender,
+                                    Date:Date.now()
+                          });
+                        }
+                      }).catch((error) => {
+                      });
+    
+                    
+                    setTimeout(function(){
+                        navigate('/ProudMemberCard');
+                    },5000)
+                }
+                else
+                {
+                get(child(ref(database), `users/employee/`)).then((snapshot) => {
                     if (snapshot.exists()) {
                         snapshot.forEach((user)=>{
                             newuserid = user.key;
                             if(user.val().Email == authContext.email){
-                                console.log(user.val().Email);
-                                console.log(authContext.email);
                               olduserid = user.key;
                             }
                         })
                         if(olduserid!=""){
-                            console.log(olduserid);
-                            set(ref(database, 'users/' + olduserid), {
+                            set(ref(database, 'users/employee/' + olduserid), {
                                 Email: authContext.email,
                                 Name: `${firstName} ${lastName}`,
                                 Designation: firstTitle,
                                 Company: firstTitlecompany,
                                 DP: profilePicture,
-                                linkedin: authContext.Linkedin,
+                                Linkedin: authContext.Linkedin,
                                 Phone: authContext.phone,
+                                Gender:authContext.gender,
+                                Date:Date.now()
                               });
                         }
                         else{
                             newuserid = Number(newuserid)+1;
-                            console.log(newuserid);
-                            set(ref(database, 'users/' + newuserid), {
+                            set(ref(database, 'users/employee/' + newuserid), {
                                 Email: authContext.email,
                                 Name: `${firstName} ${lastName}`,
                                 Designation: firstTitle,
                                 Company: firstTitlecompany,
                                 DP: profilePicture,
-                                linkedin: authContext.Linkedin,
+                                Linkedin: authContext.Linkedin,
                                 Phone: authContext.phone,
+                                Gender:authContext.gender,
+                                Date:Date.now()
                               });
                         }
                     } else {
-                      console.log("No data available");
-                      set(ref(database, 'users/' + "1"), {
+                      set(ref(database, 'users/employee/' + "1"), {
                         Email: authContext.email,
-                        Name: `${firstName} ${lastName}`,
-                        Designation: firstTitle,
-                        Company: firstTitlecompany,
-                        DP: profilePicture,
-                        linkedin: authContext.Linkedin,
-                        Phone: authContext.phone,
+                                Name: `${firstName} ${lastName}`,
+                                Designation: firstTitle,
+                                Company: firstTitlecompany,
+                                DP: profilePicture,
+                                Linkedin: authContext.Linkedin,
+                                Phone: authContext.phone,
+                                Gender:authContext.gender,
+                                Date:Date.now()
                       });
                     }
                   }).catch((error) => {
-                    console.error(error);
                   });
 
                 
                 setTimeout(function(){
                     navigate('/ProudMemberCard');
                 },5000)
+            }
                 }
             } catch (error) {
-                console.error(error);
                 toast.error('Failed to fetch data. Please try again later.');
             }
         } else {
@@ -192,7 +262,8 @@ function LinkedinLogin() {
                             e.preventDefault();
                             handleSubmit(0);
                             }} style={{ borderRadius: '10px' }}>
-                            <div data-mdb-input-init className="form-outline mb-4">
+                                <h3 className='h1login'>Get Started with WoW HR</h3>
+                            <div data-mdb-input-init className="form-outline mb-3">
                                 <label>LINKEDIN URL:</label>
                                 <input
                                     className='url-style1'
@@ -205,7 +276,24 @@ function LinkedinLogin() {
                                 {errors.linkedin && <span className="error">{errors.linkedin}</span>}
                             </div>
 
-                            <div data-mdb-input-init className="form-outline mb-4">
+                            <div data-mdb-input-init className="form-outline mb-3">
+                                    <label>Profession:</label>
+                                    <div className="input-group">
+                                        <select
+                                            className="form-select form-control"
+                                            id="profession"
+                                            name="profession"
+                                            onChange={(e) => authContext.setprofession(e.target.value)}
+                                        >
+                                            <option value="0">Select Profession</option>
+                                            <option value="employee">Employee</option>
+                                            <option value="student">Student</option>
+                                        </select>
+                                    </div>
+                                    {errors.profession && <span className="error">{errors.profession}</span>}
+                                </div>
+
+                            <div data-mdb-input-init className="form-outline mb-3">
                                 <label>Email:</label>
                                 <input
                                     className='email-style1'
@@ -218,7 +306,7 @@ function LinkedinLogin() {
                                 {errors.email && <span className="error">{errors.email}</span>}
                             </div>
 
-                            <div data-mdb-input-init className="form-outline mb-4 width_style">
+                            <div data-mdb-input-init className="form-outline mb-3 width_style">
                                 <label>Phone Number:</label>
                                 <PhoneInput
                                     country={number}
@@ -228,14 +316,33 @@ function LinkedinLogin() {
                                     inputProps={{ className: 'phone-input-input' }}
                                     dropdownClass="phone-input-country-select"
                                 />
+                                {errors.phone && <span className="error">{errors.phone}</span>}
                             </div>
+
+                            <div data-mdb-input-init className="form-outline mb-3">
+                                    <label>Gender:</label>
+                                    <div className="input-group">
+                                        <select
+                                            className="form-select form-control"
+                                            id="gender"
+                                            name="gender"
+                                            onChange={(e) => authContext.setgender  (e.target.value)}
+                                            required
+                                        >
+                                            <option value="0">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Others</option>
+                                        </select>
+                                    </div>
+                                    {errors.gender && <span className="error">{errors.gender}</span>}
+                                </div>
 
                             <div>
                                 <button className='submit' type="submit">Get Started</button>
-                                <p style={{ marginTop: '20px', marginBottom: '20px' }} className='pt-3'>
+                                <p style={{ marginTop: '20px', marginBottom: '20px' }}>
                                     If you don't have a LinkedIn account, please <Link to='/login'>Click here</Link>.
                                 </p>
-                                <Link to="admin">Admin Page</Link>
                             </div>
                         </form>
                     </div>

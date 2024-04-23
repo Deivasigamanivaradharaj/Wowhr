@@ -8,9 +8,12 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import logo from './Assets/logo.png';
 import { child, get, getDatabase, push, ref, set } from 'firebase/database';
+import { ref as sRef} from 'firebase/storage';
 import app from '../../Firebase'
+import { getDownloadURL, getStorage, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 
 function Login() {
+    const storage = getStorage(app);
     const database = getDatabase(app);
     var newuserid = "";
     var olduserid = "";
@@ -18,6 +21,7 @@ function Login() {
     const authContext = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
+    let [image,setimage] = useState("");
     const [phoneNumber, setPhoneNumber] = useState('in');
     const [errors, setErrors] = useState({});
 
@@ -50,6 +54,9 @@ function Login() {
         e.preventDefault();
 
         const validationErrors = {};
+        if (!authContext.email || !authContext.Name.trim()) {
+            validationErrors.email = 'Email is required';
+        }
         if (!authContext.Name || !authContext.Name.trim()) {
             validationErrors.name = 'Name is required';
         }
@@ -59,66 +66,101 @@ function Login() {
         if (!authContext.companyname || !authContext.companyname.trim()) {
             validationErrors.company = 'Company Name is required';
         }
-        if (!authContext.phone || !authContext.phone.trim()) {
-            validationErrors.phone = 'Phone is required';
+        if (!authContext.profession) {
+            validationErrors.profession = 'Profession is required';
         }
-        if (!email.trim()) {
-            validationErrors.email = 'Email is required';
-        } else if (!validateEmail(email)) {
-            validationErrors.email = 'Please enter a valid email address';
+        if (!authContext.phone) {
+            validationErrors.phone = 'Phone Number is required';
+        }
+        if (!authContext.gender || authContext.gender=="0") {
+            validationErrors.gender = 'Gender is required';
         }
         
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             toast.error('Please check the form for errors.');
         } else {
+            const storageRef = sRef(storage, `images/${image.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, image);
+            uploadBytes(storageRef, image).then((snapshot) => {
+                const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+              },
+              (error) => {
+                  alert(error);
+              });
+              fetchimageurl()
+            
+    }
+    };
 
-            get(child(ref(database), `users/`)).then((snapshot) => {
+    function fetchimageurl(){
+        const storageRef = sRef(storage, `images/${image.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, image);
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            uploaddatatofirebase(downloadURL)
+        });
+    }
+
+    function uploaddatatofirebase(url){
+        if(document.getElementById('profession').value=="student"){
+            get(child(ref(database), `users/students/`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach((user)=>{
                         newuserid = user.key;
                         if(user.val().Email == authContext.email){
-                            console.log(user.val().Email);
-                            console.log(authContext.email);
                           olduserid = user.key;
                         }
                     })
                     if(olduserid!=""){
-                        console.log(olduserid);
-                        set(ref(database, 'users/' + olduserid), {
+                        set(ref(database, 'users/students/' + olduserid), {
                             Email: authContext.email,
                             Name: authContext.Name,
+                            Degree:authContext.degree,
+                            Yop:authContext.yop,
                             Designation: authContext.designation,
                             Company: authContext.companyname,
-                            DP: authContext.dp,
+                            Linkedin:"Linkedin not Available",
+                            College:authContext.collegename,
+                            DP: url,
                             Phone: authContext.phone,
+                            Gender:authContext.gender,
+                            Date:Date.now()
                           });
                     }
                     else{
                         newuserid = Number(newuserid)+1;
-                        console.log(newuserid);
-                        set(ref(database, 'users/' + newuserid), {
+                        set(ref(database, 'users/students/' + newuserid), {
                             Email: authContext.email,
                             Name: authContext.Name,
+                            Degree:authContext.degree,
+                            Yop:authContext.yop,
                             Designation: authContext.designation,
-                            Company: authContext.companyname,
-                            DP: authContext.dp,
+                            Company: authContext.companyname,   
+                            Linkedin:"Linkedin not Available",
+                            College:authContext.collegename,
+                            DP: url,
                             Phone: authContext.phone,
+                            Gender:authContext.gender,
+                            Date:Date.now()
                           });
                     }
                 } else {
-                  console.log("No data available");
-                  set(ref(database, 'users/' + "1"), {
+                  set(ref(database, 'users/students/' + "1"), {
                     Email: authContext.email,
-                    Name: authContext.Name,
-                    Designation: authContext.designation,
-                    Company: authContext.companyname,
-                    DP: authContext.dp,
-                    Phone: authContext.phone,
+                            Name: authContext.Name,
+                            Degree:authContext.degree,
+                            Yop:authContext.yop,
+                            Designation: authContext.designation,
+                            Company: authContext.companyname,
+                            Linkedin:"Linkedin not Available",
+                            College:authContext.collegename,
+                            DP: url,
+                            Phone: authContext.phone,
+                            Gender:authContext.gender,
+                            Date:Date.now()
                   });
                 }
               }).catch((error) => {
-                console.error(error);
               });
 
             toast.success('Form submitted successfully!');
@@ -126,7 +168,65 @@ function Login() {
                 navigate('/ProudMemberCard');
             }, 3000);
         }
-    };
+        else{
+        get(child(ref(database), `users/employee/`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((user)=>{
+                    newuserid = user.key;
+                    if(user.val().Email == authContext.email){
+                      olduserid = user.key;
+                    }
+                })
+                if(olduserid!=""){
+                    set(ref(database, 'users/employee/' + olduserid), {
+                        Email: authContext.email,
+                        Name: authContext.Name,
+                        Designation: authContext.designation,
+                        Company: authContext.companyname,
+                        DP: url,
+                        Linkedin:"Linkedin not Available",
+                        Phone: authContext.phone,
+                        Gender:authContext.gender,
+                        Date:Date.now()
+                      });
+                }
+                else{
+                    newuserid = Number(newuserid)+1;
+                    set(ref(database, 'users/employee/' + newuserid), {
+                        Email: authContext.email,
+                        Name: authContext.Name,
+                        Designation: authContext.designation,
+                        Company: authContext.companyname,
+                        DP: url,
+                        Linkedin:"Linkedin not Available",
+                        Phone: authContext.phone,
+                        Gender:authContext.gender,
+                        Date:Date.now()
+                      });
+                }
+            } else {
+              set(ref(database, 'users/employee/' + "1"), {
+                Email: authContext.email,
+                Name: authContext.Name,
+                Designation: authContext.designation,
+                Company: authContext.companyname,
+                DP: url,
+                Linkedin:"Linkedin not Available",
+                Phone: authContext.phone,
+                Gender:authContext.gender,
+                Date:Date.now()
+              });
+            }
+          }).catch((error) => {
+            console.log(error)
+          });
+
+        toast.success('Form submitted successfully!');
+        setTimeout(() => {
+            navigate('/ProudMemberCard');
+        }, 3000);
+    }
+    }
 
     const handleImageChange = (e) => {
         e.preventDefault();
@@ -176,8 +276,26 @@ function Login() {
                                     />
                                     {errors.name && <span className="error">{errors.name}</span>}
                                 </div>
-
                                 <div data-mdb-input-init className="form-outline mb-2">
+                                    <label>Profession:</label>
+                                    <div className="input-group">
+                                        <select
+                                            className="form-select form-control"
+                                            id="profession"
+                                            name="profession"
+                                            onChange={(e) => authContext.setprofession(e.target.value)}
+                                        >
+                                            <option value="">Select Profession</option>
+                                            <option value="employee">Employee</option>
+                                            <option value="student">Student</option>
+                                        </select>
+                                    </div>
+                                    {errors.profession && <span className="error">{errors.profession}</span>}
+                                </div>
+                                
+                                {/* Conditionally render the following fields based on profession */}
+                                
+                                    <div data-mdb-input-init className="form-outline mb-2">
                                     <label>Designation:</label>
                                     <input
                                         className='designation-style'
@@ -187,22 +305,59 @@ function Login() {
                                         autoComplete="off"
                                         onChange={(e) => authContext.setdesignation(e.target.value)}
                                     />
-                                    {errors.designation && <span className="error">{errors.designation}</span>}
+                                    {errors.designation && <span className="error">{errors.company}</span>}
                                 </div>
-
-
-                                <div data-mdb-input-init className="form-outline mb-2">
-                                    <label>Company Name:</label>
-                                    <input
-                                        className='designation-style'
-                                        type="text"
-                                        name="Company name"
-                                        placeholder="Enter your Company Name"
-                                        autoComplete="off"
-                                        onChange={(e) => authContext.setcompanyname(e.target.value)}
-                                    />
-                                    {errors.company && <span className="error">{errors.company}</span>}
-                                </div>
+                                    <div data-mdb-input-init className="form-outline mb-2">
+                                        <label>Company Name:</label>
+                                        <input
+                                            className='designation-style'
+                                            type="text"
+                                            name="Company name"
+                                            placeholder="Enter your Company Name"
+                                            autoComplete="off"
+                                            onChange={(e) => authContext.setcompanyname(e.target.value)}
+                                        />
+                                        {errors.company && <span className="error">{errors.company}</span>}
+                                    </div>
+                                
+                                
+                                {authContext.profession === "student" && (
+                                    <>
+                                        <div data-mdb-input-init className="form-outline mb-2">
+                                            <label>Degree:</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="degree"
+                                                name="degree"
+                                                placeholder="Enter your Degree"
+                                                onChange={(e) => authContext.setdegree(e.target.value)}
+                                            />
+                                        </div>
+                                        <div data-mdb-input-init className="form-outline mb-2">
+                                            <label>Year of Passing:</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="yearOfPassing"
+                                                name="yearOfPassing"
+                                                placeholder="Enter your Year of Passing"
+                                                onChange={(e) => authContext.setyop(e.target.value)}
+                                            />
+                                        </div>
+                                        <div data-mdb-input-init className="form-outline mb-2">
+                                            <label>College Name:</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="college"
+                                                name="college"
+                                                placeholder="Enter your Collge Name"
+                                                onChange={(e) => authContext.setcollegename(e.target.value)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
 
                                 <div data-mdb-input-init className="form-outline mb-2 width_style">
                                     <label>Phone Number:</label>
@@ -219,19 +374,42 @@ function Login() {
                                 </div>
 
                                 <div data-mdb-input-init className="form-outline mb-2">
+                                    <label>Gender:</label>
+                                    <div className="input-group">
+                                        <select
+                                            className="form-select form-control"
+                                            id="gender"
+                                            name="gender"
+                                            onChange={(e) => authContext.setgender  (e.target.value)}
+                                            required
+                                        >
+                                            <option value="0">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Others</option>
+                                        </select>
+                                    </div>
+                                    {errors.gender && <span className="error">{errors.gender}</span>}
+                                </div>
+
+                                <div data-mdb-input-init className="form-outline mb-2">
                                     <label>Upload Image:</label>
                                     <input
                                         id="imageInput"
                                         type="file"
                                         accept="image/*"
                                         style={{ display: 'none' }}
-                                        onChange={handleImageChange}
+                                        onChange={(e)=>{
+                                            e.preventDefault()
+                                            setimage(e.target.files[0])
+                                            handleImageChange(e)}}
                                     />
                                     <div
                                         className="image-drop"
                                         onClick={() => document.getElementById('imageInput').click()}
                                         onDrop={(e) => {
                                             e.preventDefault();
+                                            setimage(e.target.files[0])
                                             handleImageChange(e);
                                         }}
                                         onDragOver={(e) => e.preventDefault()}
