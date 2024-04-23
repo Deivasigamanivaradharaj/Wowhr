@@ -69,6 +69,15 @@ function Login() {
         if (!authContext.profession) {
             validationErrors.profession = 'Profession is required';
         }
+        if(authContext.profession=="student" && !authContext.degree){
+            validationErrors.degree = 'Degree is required';
+        }
+        if(authContext.profession=="student" && !authContext.yop){
+            validationErrors.yop = 'Year of Passing is required';
+        }
+        if(authContext.profession=="student" && !authContext.collegename){
+            validationErrors.collegename = 'College Name is required';
+        }
         if (!authContext.phone) {
             validationErrors.phone = 'Phone Number is required';
         }
@@ -333,6 +342,7 @@ function Login() {
                                                 placeholder="Enter your Degree"
                                                 onChange={(e) => authContext.setdegree(e.target.value)}
                                             />
+                                            {errors.degree && <span className="error">{errors.degree}</span>}
                                         </div>
                                         <div data-mdb-input-init className="form-outline mb-2">
                                             <label>Year of Passing:</label>
@@ -344,6 +354,7 @@ function Login() {
                                                 placeholder="Enter your Year of Passing"
                                                 onChange={(e) => authContext.setyop(e.target.value)}
                                             />
+                                            {errors.yop && <span className="error">{errors.yop}</span>}
                                         </div>
                                         <div data-mdb-input-init className="form-outline mb-2">
                                             <label>College Name:</label>
@@ -355,6 +366,7 @@ function Login() {
                                                 placeholder="Enter your Collge Name"
                                                 onChange={(e) => authContext.setcollegename(e.target.value)}
                                             />
+                                            {errors.collegename && <span className="error">{errors.collegename}</span>}
                                         </div>
                                     </>
                                 )}
