@@ -117,7 +117,9 @@ function CertificateContainer() {
                   <h2>wowhr</h2>
                 </div>
               </div>
-
+              <div className="dpcontainer">
+                <img  src={authcontext.dp} alt="" id="dp"/>
+              </div>
               <div className="namecontainer">
                 <div style={{ fontSize: "23px" }} className="name" id="name">
                   <b>{authcontext.Name}</b><br/>
@@ -126,7 +128,7 @@ function CertificateContainer() {
                 </div>
 
                 {authcontext.Linkedin != "" && (
-                  <div className="d-flex">
+                  <div className="d-flex" style={{alignItems:"center",gap:"5px"}}>
                     
                     <img  className="linkedin-logo-small"  src={linkedin} alt="LinkedIn Logo"/>
                     <p className="linkedin" id="linkedin">
@@ -135,9 +137,6 @@ function CertificateContainer() {
                   </div>
                 )}
 
-              </div>
-              <div className="dpcontainer">
-                <img  src={authcontext.dp} alt="" id="dp"/>
               </div>
             </div>
           </div>

@@ -100,7 +100,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    top:5px;
+    top:-18rem;
     left: 350px;
 }
 
@@ -121,12 +121,14 @@
    font-size: 18px;
    padding-bottom: 5px;
    border-bottom: 3px solid  rgb(24, 119, 24); 
+   margin: 0px;
+   max-width: 400px;
 }
 
 .dpcontainer{
     position: relative;
     left: 25px;
-    bottom:225px ;
+    top: -4rem;
     border-radius: 15px;
     overflow:hidden;
     margin:10px;
@@ -135,7 +137,8 @@
 .dpcontainer img{
     width: 280px; 
     height:280px; 
-    border-radius:50%; 
+    border-radius:50%;
+    object-fit: cover; 
 }
 
 /*linkedin data style css*/
@@ -143,14 +146,9 @@
 .linkedin-logo-small {
     width:30px;
     height:30px;
-    position: relative;
-    bottom:10px;
-    right: 2px;
 }
 .linkedin{
-    position: relative;
-    bottom:9px;
-    left: 2px;
+    margin: 0px;
 }
 
 /* ====================== End ========================*/
@@ -174,8 +172,7 @@
     }
 
     .dpcontainer{
-        margin-top:80px;
-        margin-left:20px; 
+        top: -2rem;
     }
 
     .dpcontainer img {
@@ -207,7 +204,7 @@
     /*names container*/
 
     .namecontainer{
-        top:20px;
+        top:-13rem;
         left:280px;
     }
 
@@ -221,6 +218,7 @@
 
     .name .designation{
         font-size:14px; 
+        max-width: 270px;
     }
     
     
@@ -251,8 +249,7 @@
     }
 
     .dpcontainer{
-        margin-top:90px;
-        margin-left:20px; 
+        top: -1.5rem;
     }
 
     .dpcontainer img {
@@ -284,8 +281,8 @@
     /*names container*/
 
     .namecontainer{
-        top:15px;
-        left:260px;
+        top:-12rem;
+        left:15rem;
     }
 
     .namecontainer .name{
@@ -298,6 +295,7 @@
 
     .name .designation{
         font-size:12px; 
+        max-width: 260px;
     }
 
     .linkedin { 
@@ -321,8 +319,7 @@
     }
 
     .dpcontainer{
-        margin-top:90px;
-        margin-left:20px; 
+        top: -1rem;
     }
 
     .dpcontainer img {
@@ -354,8 +351,8 @@
     /*names container*/
 
     .namecontainer{
-        top:5px;
-        left:220px;
+        top:-10rem;
+        left:13rem;
     }
 
     .namecontainer .name{
@@ -368,6 +365,7 @@
 
     .name .designation{
         font-size:13px; 
+        max-width: 220px;
     }
 
     .linkedin-logo-small{
@@ -401,8 +399,7 @@
     }
 
     .dpcontainer{
-        margin-top:90px;
-        margin-left:5px; 
+        top:-1.5rem; 
     }
 
     .dpcontainer img {
@@ -433,7 +430,7 @@
     /*names container*/
 
     .namecontainer{
-        top:-8px;
+        top:-8.5rem;
         left:155px;
     }
 
@@ -444,7 +441,8 @@
 
     .name .designation{
         font-size:10px;
-        top:-15px; 
+        top:-15px;
+        max-width: 170px; 
     }
 
 
@@ -472,7 +470,7 @@
         height: 30px;
     }
     .dpcontainer{
-         bottom:210px !important;
+         top: -1rem;
          left: 10px;
     }
     .dpcontainer img{
@@ -494,8 +492,8 @@
     }
 
     .namecontainer{
-         left: 125px ;
-         top:10px;
+         top: -7rem;
+         left: 8.5rem;
          gap:0px;
     }
 
@@ -515,6 +513,9 @@
         bottom:11px;
         left: 2px;
     }
+    .name .designation{
+        max-width: 150px; 
+    }
 }
  
 /* ====================== End ========================*/
@@ -532,7 +533,7 @@
         height:22px;
     }
     .dpcontainer{
-         bottom:210px !important;
+         top: -2rem;
          left: 10px;
      }
     .dpcontainer img{
@@ -554,8 +555,8 @@
      /*names container*/
 
     .namecontainer{
-         left:100px ;
-         top:-14px;
+         left:6.5rem ;
+         top:-6.5rem;
          gap:0px;
     }
 
@@ -580,6 +581,9 @@
     .linkedin { 
         bottom:11px;
         left: 2px;
+    }
+    .name .designation{
+        max-width: 130px; 
     }
 }
  
