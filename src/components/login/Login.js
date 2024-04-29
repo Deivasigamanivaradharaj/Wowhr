@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import './login.css';
 import AuthContext from '../Context/AuthContext';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PhoneInput from 'react-phone-input-2';
@@ -435,6 +435,9 @@ function Login() {
                                 </div>
 
                                 <button type="submit" className="submit mb-1">Get Started</button>
+                                <p style={{ marginTop: '10px'}}>
+                                    If you have a LinkedIn account, please <Link to='../'>Click here</Link>.
+                                </p>
 
                             </form>
                         </div>

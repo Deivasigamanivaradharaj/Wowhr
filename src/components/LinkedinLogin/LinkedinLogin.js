@@ -66,8 +66,6 @@ function LinkedinLogin() {
         if (Object.keys(validationErrors).length === 0) {
 
             const apiKeys = [
-                "aff0f7a8e4msh7115ef8097b45cbp131811jsn72ef2090b279",
-                "fb256fc4ffmshf3382241499b28fp162156jsn8931fd32397f",
                 "f636be2319msh550de482d2f377ap15146cjsn18ce175e67b2",
                 "18335f9fb2msh3cbdb5692212657p1ecb05jsna83e139aee8e",
                 "cf6edef85bmshc580a1192f3c722p17ddaajsn2f6a0d7753f0",
@@ -347,7 +345,8 @@ function LinkedinLogin() {
 
                             <div>
                                 <button className='submit' type="submit">Get Started</button>
-                                <p style={{ marginTop: '20px', marginBottom: '20px' }}>
+                                <span style={{marginTop : '10px'}}>Sample : https://www.linkedin.com/in/manyamsanjaykumarreddy/</span>
+                                <p style={{ marginTop: '10px'}}>
                                     If you don't have a LinkedIn account, please <Link to='/login'>Click here</Link>.
                                 </p>
                             </div>
