@@ -279,6 +279,7 @@ function LinkedinLogin() {
                                     onChange={(e) => authContext.setLinkedin(e.target.value)}
                                 />
                                 {errors.linkedin && <span className="error">{errors.linkedin}</span>}
+                                <span style={{marginTop : '5px',color:'#0080ff'}}>Sample : https://www.linkedin.com/in/sutheesh-s-7b9169130/</span>
                             </div>
 
                             <div data-mdb-input-init className="form-outline mb-3">
@@ -345,7 +346,6 @@ function LinkedinLogin() {
 
                             <div>
                                 <button className='submit' type="submit">Get Started</button>
-                                <span style={{marginTop : '10px'}}>Sample : https://www.linkedin.com/in/manyamsanjaykumarreddy/</span>
                                 <p style={{ marginTop: '10px'}}>
                                     If you don't have a LinkedIn account, please <Link to='/login'>Click here</Link>.
                                 </p>

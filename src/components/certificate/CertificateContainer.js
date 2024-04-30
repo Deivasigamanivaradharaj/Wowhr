@@ -29,6 +29,9 @@ function CertificateContainer() {
 
   const CertificateRef = useRef(null);
 
+  var linkedinoriginal = authcontext.Name;
+  var linkedinid = linkedinoriginal.replace(" ", "").toLowerCase()
+ 
   const getLinkedInName = (url) => {
     const parts = url.split("/");
     const name = parts[4];
@@ -118,7 +121,7 @@ function CertificateContainer() {
                 </div>
               </div>
               <div className="dpcontainer">
-                <img  src={authcontext.dp} alt="" id="dp"/>
+                <img  src={authcontext.dp!="" ? authcontext.dp : "images/user.png"} alt="" id="dp"/>
               </div>
               <div className="namecontainer">
                 <div style={{ fontSize: "23px" }} className="name" id="name">
@@ -132,7 +135,7 @@ function CertificateContainer() {
                     
                     <img  className="linkedin-logo-small"  src={linkedin} alt="LinkedIn Logo"/>
                     <p className="linkedin" id="linkedin">
-                    <b>{getLinkedInName(authcontext.Linkedin)}</b>
+                    <b>{linkedinid}</b>
                     </p>
                   </div>
                 )}
