@@ -66,41 +66,43 @@ function LinkedinLogin() {
         if (Object.keys(validationErrors).length === 0) {
 
             const apiKeys = [
-                "f636be2319msh550de482d2f377ap15146cjsn18ce175e67b2",
-                "18335f9fb2msh3cbdb5692212657p1ecb05jsna83e139aee8e",
-                "cf6edef85bmshc580a1192f3c722p17ddaajsn2f6a0d7753f0",
-                "bc7bb835b8msh4998bc7fc7c13afp116fa7jsn54910e3a0fef",
-                "0438240e7dmsha7b0caabc8f44c4p1a203ejsn0979cc90e2e8",
-                "91c6c5d5b0msh6d699df9be69317p1f91eajsn92a6d509a7ed",
-                "d70bfec57fmshe055afb23408e60p17f00ajsn23dd9217c78f",
-                "0ed3182fe6mshcc7c7e3fd1867f5p1b1401jsn644f581e75fa",
-                "f77a4f929cmsh9d776a7fed9ab91p18444ejsnc97c2ab5f543",
-                "75296dc20dmsh63fba10cd8681dcp1f0aeajsn2df4b6ad72c9",
-                "96f2128666msh6c2a99315734957p152189jsn585b9f07df21",
-                "7c6071ea26msh791fe69a321fc6bp13b74bjsn6099a131e787",
-                "73764e8860msh42abd7da2264e89p167a80jsn1f642dbc2aaa",
-                "dd911239b8mshf19f9ba7381beb8p1e8521jsn4203c7a62293",
-                "4fdff0ded6msh08ccce4dcf4f9bdp1db67bjsn4a0ce9978e2c",
-                "dd911239b8mshf19f9ba7381beb8p1e8521jsn4203c7a62293",
-                "6124149a51msh325445a273f5434p1ee3d0jsn76063388da09",
-                "469c7cb73dmsh7e91525de96fc3ap1ad9eajsn0650642c426b",
-                "469c7cb73dmsh7e91525de96fc3ap1ad9eajsn0650642c426b",
                 "330e744001mshfa39ba35c13b477p1bd019jsnbb0f2ffa23af",
+                "d76e658a11mshd6c269f5a381918p174e9bjsn0f7de04b570d",
+                "cf6edef85bmshc580a1192f3c722p17ddaajsn2f6a0d7753f0",
+                "068c967727msh781cf0890e2c976p141edajsnbaef46c467d3",
+                "d3e1864eddmshf29731ae68cda9ap112587jsn9cc3247c543c",
+                "bc7bb835b8msh4998bc7fc7c13afp116fa7jsn54910e3a0fef",
+                "1b035e86d7msh793f7fdae8c75a0p15d6e0jsne93d7980042d",
+                "e7f861ce3emshc756a74c6f16a9ep17c98ejsn86255ac2f58a",
+                "91c6c5d5b0msh6d699df9be69317p1f91eajsn92a6d509a7ed",
             ];
 
-            const url = "https://linkedin-data-api.p.rapidapi.com/";
-            const querystring = new URLSearchParams({ url: authContext.Linkedin });
+            const url = "https://linkedin-profiles-and-company-data.p.rapidapi.com/profile-details";
+            
+            const profileId = authContext.Linkedin.match(/(?<=linkedin\.com\/in\/)[\w-]+/)[0];
 
             const headers = {
+                "content-type": "application/json",
                 "X-RapidAPI-Key": apiKeys[apiKeyIndex],
-                "X-RapidAPI-Host": "linkedin-data-api.p.rapidapi.com",
+                "X-RapidAPI-Host": "linkedin-profiles-and-company-data.p.rapidapi.com"
             };
 
             try {
-                const response = await fetch(`${url}?${querystring}`, { headers });
+                const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    "profile_id": profileId,
+                    "profile_type": "personal",
+                    "contact_info": false,
+                    "recommendations": false,
+                    "related_profiles": false
+                })
+            });
 
                 if (!response.ok) {
-                    if (response.status === 429 && apiKeyIndex < apiKeys.length - 1) {
+                    if ((response.status === 429 && apiKeyIndex < apiKeys.length - 1) || (response.status === 403  && apiKeyIndex < apiKeys.length - 1)) {
+                        console.log("Switching to next API key...");
                         handleSubmit(apiKeyIndex + 1);
                     } else {
                         throw new Error('Failed to fetch profile data');
@@ -109,23 +111,25 @@ function LinkedinLogin() {
                 else{
                     toast.success('Fetching data...');
                 const data = await response.json();
-                const { firstName, lastName, headline, position, profilePicture, educations } = data;
-                const firstTitle = position && position.length > 0 ? position[0].title : '';
-                const fieldofstudy = educations  && educations.length > 0 ? educations[0].degree+" "+educations[0].fieldOfStudy : '';
-                const schoolName = educations  && educations.length > 0 ? educations[0].schoolName : '';
-                const endyear = educations  && educations.length > 0 ? educations[0].end.year : '';
-                const firstTitlecompany = position && position.length > 0 ? position[0].companyName : '';
+                console.log(data)
+                const { first_name, last_name, headline, position_groups, profile_picture, education } = data;
+                const firstTitle = position_groups && position_groups.length > 0 ? position_groups[0].profile_positions[0].title : '';
+                const fieldofstudy = education  && education.length > 0 ? education[0].degree_name+" "+education[0].field_of_study : '';
+                const schoolName = education  && education.length > 0 ? education[0].school.name : '';
+                const endyear = education  && education.length > 0 ? education[0].date.end.year : '';
+                const firstTitlecompany = position_groups && position_groups.length > 0 ? position_groups[0].profile_positions[0].company : '';
 
-                authContext.setName(`${firstName} ${lastName}`);
+                authContext.setName(`${first_name} ${last_name}`);
                 authContext.setdesignation(firstTitle);
                 authContext.setcompanyname(firstTitlecompany);
-                authContext.setdp(profilePicture);
+                authContext.setdp(profile_picture);
                 authContext.setdegree(fieldofstudy);
                 authContext.setyop(endyear);
                 authContext.setcollegename(schoolName);
 
 
                 if(document.getElementById('profession').value=="student"){
+                    console.log("student")
                     get(child(ref(database), `users/students/`)).then((snapshot) => {
                         if (snapshot.exists()) {
                             snapshot.forEach((user)=>{
@@ -137,11 +141,11 @@ function LinkedinLogin() {
                             if(olduserid!=""){
                                 set(ref(database, 'users/students/' + olduserid), {
                                     Email: authContext.email,
-                                    Name: `${firstName} ${lastName}`,
+                                    Name: `${first_name} ${last_name}`,
                                     Degree:fieldofstudy,
                                     Yop:endyear,
                                     College:schoolName,
-                                    DP: profilePicture,
+                                    DP: profile_picture,
                                     Linkedin: authContext.Linkedin,
                                     Phone: authContext.phone,
                                     Gender:authContext.gender,
@@ -152,11 +156,11 @@ function LinkedinLogin() {
                                 newuserid = Number(newuserid)+1;
                                 set(ref(database, 'users/students/' + newuserid), {
                                     Email: authContext.email,
-                                    Name: `${firstName} ${lastName}`,
+                                    Name: `${first_name} ${last_name}`,
                                     Degree:fieldofstudy,
                                     Yop:endyear,
                                     College:schoolName,
-                                    DP: profilePicture,
+                                    DP: profile_picture,
                                     Linkedin: authContext.Linkedin,
                                     Phone: authContext.phone,
                                     Gender:authContext.gender,
@@ -166,11 +170,11 @@ function LinkedinLogin() {
                         } else {
                           set(ref(database, 'users/students/' + "1"), {
                             Email: authContext.email,
-                                    Name: `${firstName} ${lastName}`,
+                                    Name: `${first_name} ${last_name}`,
                                     Degree:fieldofstudy,
                                     Yop:endyear,
                                     College:schoolName,
-                                    DP: profilePicture,
+                                    DP: profile_picture,
                                     Linkedin: authContext.Linkedin,
                                     Phone: authContext.phone,
                                     Gender:authContext.gender,
@@ -198,10 +202,10 @@ function LinkedinLogin() {
                         if(olduserid!=""){
                             set(ref(database, 'users/employee/' + olduserid), {
                                 Email: authContext.email,
-                                Name: `${firstName} ${lastName}`,
+                                Name: `${first_name} ${last_name}`,
                                 Designation: firstTitle,
                                 Company: firstTitlecompany,
-                                DP: profilePicture,
+                                DP: profile_picture,
                                 Linkedin: authContext.Linkedin,
                                 Phone: authContext.phone,
                                 Gender:authContext.gender,
@@ -212,10 +216,10 @@ function LinkedinLogin() {
                             newuserid = Number(newuserid)+1;
                             set(ref(database, 'users/employee/' + newuserid), {
                                 Email: authContext.email,
-                                Name: `${firstName} ${lastName}`,
+                                Name: `${first_name} ${last_name}`,
                                 Designation: firstTitle,
                                 Company: firstTitlecompany,
-                                DP: profilePicture,
+                                DP: profile_picture,
                                 Linkedin: authContext.Linkedin,
                                 Phone: authContext.phone,
                                 Gender:authContext.gender,
@@ -225,10 +229,10 @@ function LinkedinLogin() {
                     } else {
                       set(ref(database, 'users/employee/' + "1"), {
                         Email: authContext.email,
-                                Name: `${firstName} ${lastName}`,
+                                Name: `${first_name} ${last_name}`,
                                 Designation: firstTitle,
                                 Company: firstTitlecompany,
-                                DP: profilePicture,
+                                DP: profile_picture,
                                 Linkedin: authContext.Linkedin,
                                 Phone: authContext.phone,
                                 Gender:authContext.gender,
